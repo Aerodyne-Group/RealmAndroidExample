@@ -13,6 +13,6 @@ class Frog : RealmObject {
     @PrimaryKey
     var id: ObjectId = ObjectId()
     var name: String? = null
-    var age: String? = null
+    var age: Long? = null
     var pond: Pond? = null
 }

@@ -9,6 +9,9 @@ import io.realm.kotlin.dynamic.DynamicMutableRealmObject
 import io.realm.kotlin.dynamic.DynamicRealm
 import io.realm.kotlin.dynamic.DynamicRealmObject
 import io.realm.kotlin.migration.AutomaticSchemaMigration
+import io.realm.kotlin.notifications.ResultsChange
+import io.realm.kotlin.query.RealmScalarQuery
+import kotlinx.coroutines.flow.Flow
 
 /**
  *
@@ -38,8 +41,8 @@ object RealmHelper {
                     }
                 }
             }*/
-        val realmBuilder = RealmConfiguration.Builder(schema = setOf(Frog::class, Pond::class))
-            .schemaVersion(1)//.migration(migration, true)
+        val realmBuilder = RealmConfiguration.Builder(schema = setOf(Frog::class, Pond::class))//
+            .schemaVersion(3)//.migration(migration, true)
         val configuration =
             realmBuilder.build()//RealmConfiguration.create(schema = setOf(User::class))
         realm = Realm.open(configuration)
@@ -61,7 +64,23 @@ object RealmHelper {
         }
     }
 
+    suspend fun clearAllFrog() {
+        realm.write {
+            val frogsLeftInTheRealm = query(Frog::class).find()
+            // Pass the query results to delete()
+            delete(frogsLeftInTheRealm)
+        }
+    }
+
     fun getAllFrog(): List<Frog> {
         return realm.query(Frog::class).find()
+    }
+
+    fun getAllFrogFlow(): Flow<ResultsChange<Frog>> {
+        return realm.query(Frog::class).asFlow()
+    }
+
+    fun getFrogCount(): Long {
+        return realm.query(Frog::class).count().find()
     }
 }
